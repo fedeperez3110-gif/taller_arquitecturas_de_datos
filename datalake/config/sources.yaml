@@ -1,0 +1,21 @@
+# Fuentes RSS del data lake (requisito 4.1).
+# Cada URL fue verificada como feed RSS 2.0 válido el 2026-10-22.
+# La página del directorio (eltiempo.com/rss) NO es un feed y no debe ir aquí.
+media: el_tiempo
+
+sources:
+  - source_id: eltiempo_medellin
+    section: medellin
+    url: https://www.eltiempo.com/rss/colombia_medellin.xml
+
+  - source_id: eltiempo_economia
+    section: economia
+    url: https://www.eltiempo.com/rss/economia.xml
+
+  - source_id: eltiempo_justicia
+    section: justicia
+    url: https://www.eltiempo.com/rss/justicia.xml
+
+http:
+  timeout_seconds: 20
+  user_agent: "EIA-DataLake-Lab/1.0 (proyecto academico)"

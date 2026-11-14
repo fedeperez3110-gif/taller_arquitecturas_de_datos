@@ -1,0 +1,80 @@
+# Airflow 2.10 con LocalExecutor + Postgres, pensado para una sola EC2.
+# Las credenciales de AWS NO van aquí: boto3 las toma del rol IAM de la EC2.
+#
+# Antes del primer `docker compose up`:
+#   docker build -t rss-datalake-airflow:2.10.5 .
+#   docker compose up airflow-init
+
+x-airflow-common: &airflow-common
+  image: rss-datalake-airflow:2.10.5
+  pull_policy: never
+  env_file:
+    - path: .env
+      required: true
+    - path: ../dw/.env           # Data Warehouse (opcional: sin él el DAG del DW no corre)
+      required: false
+  environment: &airflow-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "false"
+    AIRFLOW__CORE__DEFAULT_TIMEZONE: "UTC"
+    PYTHONPATH: /opt/airflow/src:/opt/airflow/dw/src
+    DATALAKE_CONFIG: /opt/airflow/config/sources.yaml
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./src:/opt/airflow/src
+    - ./config:/opt/airflow/config
+    - ./sql:/opt/airflow/sql:ro            # consultas de negocio (las usa el recolector de evidencias)
+    - ./logs:/opt/airflow/logs
+    # Data Warehouse: código, DAG (subcarpeta de dags) y proyecto dbt
+    - ../dw:/opt/airflow/dw
+    - ../dw/dags:/opt/airflow/dags/dw
+  user: "${AIRFLOW_UID:-50000}:0"
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 5
+    restart: unless-stopped
+
+  airflow-init:
+    <<: *airflow-common
+    command:
+      - bash
+      - -c
+      - |
+        airflow db migrate &&
+        airflow users create --role Admin \
+          --username "$${_AIRFLOW_WWW_USER_USERNAME}" \
+          --password "$${_AIRFLOW_WWW_USER_PASSWORD}" \
+          --firstname Admin --lastname DataLake --email admin@example.com || true
+    restart: "no"
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    restart: unless-stopped
+
+volumes:
+  postgres-db:

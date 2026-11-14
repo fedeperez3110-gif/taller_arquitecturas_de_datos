@@ -1,0 +1,14 @@
+# Copia como terraform.tfvars y ajusta. Este archivo no lleva secretos.
+
+aws_region    = "us-east-2"
+instance_type = "t3.large"
+
+# Llave SSH generada con:  ssh-keygen -t ed25519 -f ~/.ssh/rss-datalake -N ""
+ssh_public_key_path = "~/.ssh/rss-datalake.pub"
+
+# Déjalo comentado para que Terraform detecte tu IP pública actual.
+# allowed_cidrs = ["181.50.10.20/32"]
+
+# Alerta de costos (omítelo si ya creaste un presupuesto en la consola).
+# alert_email        = "tu-correo@ejemplo.com"
+# monthly_budget_usd = 10

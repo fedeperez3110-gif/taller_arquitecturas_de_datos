@@ -1,0 +1,11 @@
+# Secretos y estado local (cada proyecto tiene además su propio .gitignore)
+.env
+*.pem
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform/
+__pycache__/
+.pytest_cache/
+*.zip

@@ -1,0 +1,9 @@
+# Dependencias del pipeline (Airflow ya trae boto3, requests y PyYAML).
+defusedxml
+pandas
+pyarrow
+# Data Warehouse (dw/): fuentes, Redshift y generación de datos de prueba
+pymysql
+pymongo
+redshift-connector
+faker

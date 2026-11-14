@@ -1,0 +1,23 @@
+flowchart TB
+  %% la EC2 es la misma del Data Lake (rss-datalake)
+  subgraph VPC["VPC por defecto · us-east-2"]
+    subgraph EC2["EC2 (la del Data Lake)"]
+      AF["Airflow 2.10<br/>DAG dw_ecommerce_pipeline"]
+      DBT["dbt-redshift 1.9<br/>(venv propio)"]
+    end
+    MY[("RDS MySQL 8.4<br/>customers · products<br/>orders · order_items")]
+    DOC[("DocumentDB 5.0<br/>reviews<br/>navigation_events")]
+    RS[("Redshift Serverless 4 RPU<br/>raw_data → intermediate<br/>quarantine · snapshots · marts")]
+  end
+  S3[("S3 privado ecommerce-dw-…<br/>raw/&lt;fuente&gt;/&lt;entidad&gt;/batch_id=&lt;id&gt;/<br/>control/batches/batch_id=&lt;id&gt;/")]
+  SM["Secrets Manager<br/>ecommerce-dw/*"]
+  QS["QuickSight<br/>Direct Query a<br/>marts.rpt_sales_dashboard"]
+
+  MY -- "TLS · incremental por marca" --> AF
+  DOC -- "TLS · id &gt; marca" --> AF
+  AF -- "Parquet + manifiestos por lote" --> S3
+  S3 -- "COPY · rol IAM" --> RS
+  AF --> DBT
+  DBT -- "SQL ejecutado en Redshift" --> RS
+  SM -. "credenciales (rol de la EC2)" .-> AF
+  RS -- "SSL · 5439 solo desde el CIDR de QuickSight" --> QS

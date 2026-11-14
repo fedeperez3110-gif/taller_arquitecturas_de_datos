@@ -1,0 +1,20 @@
+# Secretos y estado local
+.env
+*.pem
+
+# Terraform: el estado puede contener datos sensibles y es propio de tu cuenta
+infra/terraform/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+
+# Python / Airflow
+logs/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+*.zip
+dags/dw/

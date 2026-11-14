@@ -1,0 +1,9 @@
+# Copia como terraform.tfvars. Sin secretos.
+aws_region = "us-east-2"
+
+# Nombres de la EC2 de Airflow creada por el proyecto datalake (no cambiar si usaste sus valores por defecto).
+# airflow_ec2_role_name           = "rss-datalake-ec2-role"
+# airflow_ec2_security_group_name = "rss-datalake-sg"
+
+# Para conectar QuickSight (paso del dashboard) cambia a true y ejecuta terraform apply.
+redshift_publicly_accessible = false

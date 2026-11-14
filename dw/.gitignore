@@ -1,0 +1,22 @@
+# Secretos y estado local
+.env
+*.pem
+infra/terraform/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform.lock.hcl.bak
+crash.log
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+*.zip
